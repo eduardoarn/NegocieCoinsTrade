@@ -1,0 +1,8 @@
+{
+  "name": "NegocieCoinsTradeMobile",
+  "app_id": "61df67da",
+  "type": "ionic-angular",
+  "integrations": {
+    "cordova": {}
+  }
+}
