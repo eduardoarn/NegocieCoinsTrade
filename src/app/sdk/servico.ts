@@ -1,5 +1,6 @@
 export class ServicoBase {
     tipo: string;
-    utlBase: string;
+    operacao: string;
+    urlBase: string;
     autenticacao: boolean = false;
 }

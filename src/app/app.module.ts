@@ -1,6 +1,8 @@
 import { NgModule, ErrorHandler,LOCALE_ID  } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
+import { IonicStorageModule } from '@ionic/storage';
+
 import { MyApp } from './app.component';
 
 import { AboutPage } from '../pages/about/about';
@@ -14,6 +16,7 @@ import {  HttpModule } from '@angular/http';
 import { HttpClient } from './sdk/clienteHttp';
 import localePt from '@angular/common/locales/pt';
 import { registerLocaleData } from '@angular/common';
+import { ConfiguracoesPage } from '../pages/configuracoes/configuracoes';
 
 registerLocaleData(localePt, 'pt-BR');
 
@@ -26,13 +29,17 @@ registerLocaleData(localePt, 'pt-BR');
     AboutPage,
     ContactPage,
     HomePage,
+    ConfiguracoesPage,
     TabsPage
   ],
   imports: [
     HttpModule,
     //HttpClientModule,
     BrowserModule,
-    IonicModule.forRoot(MyApp)
+    IonicModule.forRoot(MyApp),
+    IonicStorageModule.forRoot({
+      name:'_dbLocal'
+    })    
   ],
   bootstrap: [IonicApp],
   entryComponents: [
@@ -40,6 +47,7 @@ registerLocaleData(localePt, 'pt-BR');
     AboutPage,
     ContactPage,
     HomePage,
+    ConfiguracoesPage,
     TabsPage
   ],
   providers: [

@@ -5,49 +5,116 @@
 </ion-header>
 
 <ion-content padding>
-  <h2 style="text-align: center">NegocieCoins</h2>
-  <div *ngIf="ultimaCotacao">
-    <div>
-      <b>Valor:</b> {{ultimaCotacao.last | currency:'BRL':2}} |
-      <b>Compra:</b> {{ultimaCotacao.buy | currency:'BRL':2}} |
-      <b>Venda:</b> {{ultimaCotacao.sell | currency:'BRL':2}}
+  <div>
+    <h2 style="text-align: center">NegocieCoins</h2>
+    <div *ngIf="ultimaCotacao">
+      <div>
+        <b>Valor:</b> {{ultimaCotacao.last | currency:'BRL':2}} |
+        <b>Compra:</b> {{ultimaCotacao.buy | currency:'BRL':2}} |
+        <b>Venda:</b> {{ultimaCotacao.sell | currency:'BRL':2}} |
+        <b>Ultimas 24H</b>
+        |
+        <b>Menor Valor:</b> {{ultimaCotacao.low | currency:'BRL':2}} |
+        <b>Maior Valor:</b> {{ultimaCotacao.high | currency:'BRL':2}} |
+        <b>Volume:</b> {{ultimaCotacao.vol | number:'3.2-2'}} |
+        <b>Atualização:</b> {{ (ultimaCotacao.date*1000) | date:'dd/MM/yyyy HH:mm:ss'}}
+      </div>
     </div>
-    <div style="text-align: center">
-      <b>Ultimas 24H</b>
+    <button ion-button (click)="atualizarUltimaCotacao()" *ngIf="!carregando">Atualizar</button>
+    <button ion-button disabled *ngIf="carregando">Atualizando...</button>
+  </div>
+
+
+
+  <div *ngIf="coinMarketCap">
+    <hr>
+    <h2>CoinMarketCap</h2>
+    <b>Total USD:</b> {{coinMarketCap.market_cap_usd | currency:'USD':2}} |
+    <b>Preço USD</b> {{coinMarketCap.price_usd | currency:'USD':2 }} |
+    <b>Total BRL</b> {{coinMarketCap.market_cap_brl | currency:'BRL':2 }} |
+    <b>Preço BRL</b> {{coinMarketCap.price_brl | currency:'BRL':2}}
+    <br>
+    <b>(%) 1H:</b> {{coinMarketCap.percent_change_1h | number:'1.2'}} |
+    <b>(%) 24H:</b> {{coinMarketCap.percent_change_24h | number:'1.2'}} |
+    <b>(%) 7DH:</b> {{coinMarketCap.percent_change_7d | number:'1.2'}} |
+    <button ion-button (click)="atualizaCoinMarketCap()" *ngIf="!carregandoCoinMarketCap">Atualizar</button>
+    <button ion-button disabled *ngIf="carregandoCoinMarketCap">Atualizando...</button>
+  </div>
+
+  <div *ngIf="poloniex">
+    <hr>
+    <h2>Poloniex</h2>
+    <b>Preço USD:</b> {{poloniex.last | currency:'USD':2}} |
+    <b>Max USD</b> {{poloniex.high24hr | currency:'USD':2 }} |
+    <b>Min USD</b> {{poloniex.low24hr | currency:'USD':2 }} |
+    <b>(%) 24H:</b> {{poloniex.percentChange * 100| number:'1.2'}} |
+    <button ion-button (click)="atualizaPloniex()" *ngIf="!carregandoPoloniex">Atualizar</button>
+    <button ion-button disabled *ngIf="carregandoPoloniex">Atualizando...</button>
+
+  </div>
+
+ 
+
+  <div>
+    <div *ngIf="AppId && AppKey">
+      <div *ngIf="balanco">
+        <hr>
+
+        <div *ngFor="let i of balanco.coins">
+          <div *ngIf="i.total">
+            <b>{{i.name}}:</b> {{i.total | number:'1.1-8'}}
+          </div>
+        </div>
+      </div>
+
+      <button ion-button (click)="carregaDados()" *ngIf="!carregandoSaldo">Atualizar Saldo</button>
+      <button ion-button disabled *ngIf="carregandoSaldo">Atualizando Saldo...</button>
     </div>
-    <div>
-      <b>Menor Valor:</b> {{ultimaCotacao.low | currency:'BRL':2}} |
-      <b>Maior Valor:</b> {{ultimaCotacao.high | currency:'BRL':2}} |
-      <b>Volume:</b> {{ultimaCotacao.vol | number:'3.2-2'}}
-    </div>
-    <div>
-      {{ (ultimaCotacao.date*1000) | date:'dd/MM/yyyy HH:mm:ss'}}
+    <div *ngIf="!AppId || !AppKey">
+      Defina as suas chaves de api nas configurações pra poder visualizar o seu saldo
     </div>
   </div>
-  <button ion-button (click)="atualizarUltimaCotacao()" *ngIf="!carregando">Atualizar</button>
-  <button ion-button disabled *ngIf="carregando">Atualizando...</button>
-  <ion-item>
-    <ion-label floating>Tempo de atualização (Segundos)</ion-label>
-    <ion-input type="number" [(ngModel)]="tempoAtualizacao"></ion-input>
 
-  </ion-item>
-  <hr>
   <div *ngIf="ultimaCotacao">
-    <h3 style="text-align: center">Calculadora</h3>
-    <ion-item>
-      <ion-label floating>Valor em Bitcoins</ion-label>
-      <ion-input type="number" [(ngModel)]="valorCalcular"></ion-input>
-    </ion-item>
-    <ion-item *ngIf="valorCalcular">
-      <span>Valor:</span>
-      <b>{{valorCalcular * ultimaCotacao.last | currency:'BRL':2}}</b> |
-      <div>
-        <span>Compra:</span>
-        <b>{{valorCalcular * ultimaCotacao.buy | currency:'BRL':2}}</b> |
-        <span>Venda:</span>
-        <b>{{valorCalcular * ultimaCotacao.sell | currency:'BRL':2}}</b>
-      </div>
-    </ion-item>
+    <h3 style="text-align: center">Calculadora / Conversão</h3>
+    <ion-grid>
+      <ion-row>
+        <ion-col col-6>
+          <ion-item>
+            <ion-label floating>Valor em Bitcoins</ion-label>
+            <ion-input type="number" [(ngModel)]="valorCalcular"></ion-input>
+          </ion-item>
+          <ion-item *ngIf="valorCalcular">
+            <span>Valor:</span>
+            <br>
+            <b>{{valorCalcular * ultimaCotacao.last | currency:'BRL':2}}</b>
+            <!-- <div>
+              <span>Compra:</span>
+              <b>{{valorCalcular * ultimaCotacao.buy | currency:'BRL':2}}</b> |
+              <span>Venda:</span>
+              <b>{{valorCalcular * ultimaCotacao.sell | currency:'BRL':2}}</b>
+            </div> -->
+          </ion-item>
+        </ion-col>
+        <ion-col col-6>
+          <ion-item>
+            <ion-label floating>Valor em Reais</ion-label>
+            <ion-input type="number" [(ngModel)]="valorCalcular2"></ion-input>
+          </ion-item>
+          <ion-item *ngIf="valorCalcular2">
+            <span>Valor:</span>
+            <br>
+            <b>{{valorCalcular2 / ultimaCotacao.last | number:'1.1-8'}}</b>
+            <!-- <div>
+              <span>Compra:</span>
+              <b>{{valorCalcular2 / ultimaCotacao.buy | currency: 2}}</b> |
+              <span>Venda:</span>
+              <b>{{valorCalcular2 / ultimaCotacao.sell | currency: 2}}</b>
+            </div> -->
+          </ion-item>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
   </div>
 
 </ion-content>
